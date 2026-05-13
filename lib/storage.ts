@@ -16,12 +16,14 @@ function detectProvider(): StorageProvider {
 }
 
 async function toArrayBuffer(file: File | Buffer): Promise<ArrayBuffer> {
-  if (file instanceof Buffer) {
+  if (Buffer.isBuffer(file)) {
     const ab = new ArrayBuffer(file.byteLength);
-    new Uint8Array(ab).set(new Uint8Array(file.buffer, file.byteOffset, file.byteLength));
+    new Uint8Array(ab).set(new Uint8Array(file.buffer as ArrayBuffer, file.byteOffset, file.byteLength));
     return ab;
   }
-  return file.arrayBuffer();
+  // file is a Web API File — safe to call .arrayBuffer()
+  const webFile = file as File;
+  return webFile.arrayBuffer();
 }
 
 function toBlob(ab: ArrayBuffer, contentType: string): Blob {
